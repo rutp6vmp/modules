@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2.0,
+  "id": "custom_disk_usage",
+  "type": "widget",
+  "name": "硬碟使用狀況",
+  "namespace": "CustomDiskUsage",
+  "version": "1.0",
+  "author": "Daniel",
+  "description": "顯示指定主機的 IP、硬碟總空間、已使用空間與使用率。",
+  "actions": {
+    "widget.custom_disk_usage.view": {
+      "class": "WidgetView"
+    }
+  },
+  "assets": {
+    "css": ["widget.css"]
+  }
+}
