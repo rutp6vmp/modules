@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2.0,
+  "id": "custom_icmp_status",
+  "type": "widget",
+  "name": "ICMP 狀態",
+  "namespace": "CustomIcmpStatus",
+  "version": "1.0",
+  "author": "Daniel",
+  "description": "顯示 Host group 內各主機的 ICMP 狀態、延遲與封包遺失率。",
+  "actions": {
+    "widget.custom_icmp_status.view": {
+      "class": "WidgetView"
+    }
+  },
+  "assets": {
+    "css": ["widget.css"]
+  }
+}

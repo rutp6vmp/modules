@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2.0,
+  "id": "custom_memory_usage",
+  "type": "widget",
+  "name": "記憶體使用狀況",
+  "namespace": "CustomMemoryUsage",
+  "version": "1.0",
+  "author": "Daniel",
+  "description": "顯示 Host group 內各主機的記憶體容量與使用率。",
+  "actions": {
+    "widget.custom_memory_usage.view": {
+      "class": "WidgetView"
+    }
+  },
+  "assets": {
+    "css": ["widget.css"]
+  }
+}

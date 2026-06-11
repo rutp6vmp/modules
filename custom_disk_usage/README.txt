@@ -4,6 +4,7 @@ custom_disk_usage - Zabbix 6.4 dashboard widget
 - 可選擇一台 Zabbix Host
 - 顯示 Host 名稱與 IP
 - 顯示各硬碟掛載點、總空間、已使用空間、使用率
+- Linux 掛載點的容量依 df -h 原則顯示
 - 不顯示最後更新時間
 
 安裝：

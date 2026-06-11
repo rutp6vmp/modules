@@ -46,6 +46,55 @@ $format_bytes = static function ($bytes): string {
 
     return number_format($bytes, 1).' '.$units[$index];
 };
+/*
+ * 依 GNU df -h 的方式顯示 Linux 檔案系統容量：
+ * - 以 1024 為進位基準
+ * - 使用 K、M、G、T、P 單位
+ * - 小於 10 顯示一位小數，其餘顯示整數
+ * - 為避免低估容量，顯示值一律向上取整
+ *
+ * 範例：
+ *   1073741824 -> 1.0G
+ *   10737418240 -> 10G
+ */
+$format_df_bytes = static function ($bytes): string {
+    if ($bytes === null || $bytes === '' || !is_numeric($bytes)) {
+        return '-';
+    }
+
+    $value = max(0, (float) $bytes);
+    $units = [
+        'B',
+        'K',
+        'M',
+        'G',
+        'T',
+        'P'
+    ];
+    $index = 0;
+
+    while ($value >= 1024 && $index < count($units) - 1) {
+        $value /= 1024;
+        $index++;
+    }
+
+    if ($index === 0) {
+        return number_format(ceil($value), 0, '.', '');
+    }
+
+    $rounded_value = $value < 10
+        ? ceil($value * 10) / 10
+        : ceil($value);
+
+    if ($rounded_value >= 1024 && $index < count($units) - 1) {
+        $rounded_value /= 1024;
+        $index++;
+    }
+
+    $decimals = $rounded_value < 10 ? 1 : 0;
+
+    return number_format($rounded_value, $decimals, '.', '').$units[$index];
+};
 
 /*
  * 將使用率轉換成百分比格式。
@@ -154,12 +203,16 @@ foreach ($data['rows'] as $row) {
     /*
      * 正常磁碟資料。
      */
+    $format_size = isset($row['is_linux']) && $row['is_linux']
+        ? $format_df_bytes
+        : $format_bytes;
+
     $table->addRow([
         $row['host_name'],
         $row['host_ip'],
         $row['filesystem'],
-        $format_bytes($row['used']),
-        $format_bytes($row['total']),
+        $format_size($row['used']),
+        $format_size($row['total']),
         $create_progress_bar($row['pused'])
     ]);
 }

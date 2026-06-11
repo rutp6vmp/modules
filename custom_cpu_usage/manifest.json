@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2.0,
+  "id": "custom_cpu_usage",
+  "type": "widget",
+  "name": "CPU 使用狀況",
+  "namespace": "CustomCpuUsage",
+  "version": "1.0",
+  "author": "Daniel",
+  "description": "顯示 Host group 內各主機的 CPU 使用率。",
+  "actions": {
+    "widget.custom_cpu_usage.view": {
+      "class": "WidgetView"
+    }
+  },
+  "assets": {
+    "css": ["widget.css"]
+  }
+}

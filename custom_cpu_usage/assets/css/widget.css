@@ -1,0 +1,37 @@
+.dashboard-widget-custom_cpu_usage .metric-progress {
+    position: relative;
+    width: 100%;
+    min-width: 120px;
+    height: 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #f3f4f6;
+    overflow: hidden;
+}
+
+.dashboard-widget-custom_cpu_usage .metric-progress__fill {
+    height: 100%;
+}
+
+.dashboard-widget-custom_cpu_usage .metric-progress__fill--normal {
+    background: #10b981;
+}
+
+.dashboard-widget-custom_cpu_usage .metric-progress__fill--warning {
+    background: #f59e0b;
+}
+
+.dashboard-widget-custom_cpu_usage .metric-progress__fill--critical {
+    background: #ef4444;
+}
+
+.dashboard-widget-custom_cpu_usage .metric-progress__text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #111827;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
