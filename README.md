@@ -7,7 +7,7 @@
 - `custom_disk_usage`：磁碟容量與使用率，Linux 容量依 `df -h` 原則顯示
 - `custom_cpu_usage`：CPU 使用率
 - `custom_memory_usage`：記憶體容量與使用率
-- `custom_icmp_status`：ICMP 狀態、延遲與封包遺失率
+- `custom_icmp_status`：連線狀態；優先 ICMP，沒有 ICMP item 時改用 Agent
 
 ## 安裝
 
@@ -22,4 +22,4 @@
 - Disk：`vfs.fs.size[*]`
 - CPU：`system.cpu.util[,idle]`
 - Memory：`vm.memory.size[*]`
-- ICMP：`icmpping`、`icmppingsec`、`icmppingloss`
+- Connectivity：`icmpping*`，fallback 為 `agent.ping`

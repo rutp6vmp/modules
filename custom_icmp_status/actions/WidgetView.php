@@ -17,7 +17,9 @@ class WidgetView extends CControllerDashboardWidgetView {
         if ($groupids) {
             $hosts = API::Host()->get([
                 'output' => ['hostid', 'name'],
-                'selectInterfaces' => ['ip', 'dns', 'useip', 'type', 'main'],
+                'selectInterfaces' => [
+                    'ip', 'dns', 'useip', 'type', 'main', 'available'
+                ],
                 'groupids' => $groupids,
                 'monitored_hosts' => true,
                 'sortfield' => 'name',
@@ -60,6 +62,27 @@ class WidgetView extends CControllerDashboardWidgetView {
                     ];
                 }
             }
+
+            $agent_items = API::Item()->get([
+                'output' => ['hostid', 'key_', 'lastvalue', 'lastclock'],
+                'groupids' => $groupids,
+                'monitored' => true,
+                'filter' => ['key_' => 'agent.ping']
+            ]);
+
+            foreach ($agent_items as $item) {
+                $hostid = $item['hostid'];
+
+                if (
+                    !isset($icmp[$hostid]['agent.ping'])
+                    || (int) $item['lastclock'] > $icmp[$hostid]['agent.ping']['lastclock']
+                ) {
+                    $icmp[$hostid]['agent.ping'] = [
+                        'value' => $item['lastvalue'],
+                        'lastclock' => (int) $item['lastclock']
+                    ];
+                }
+            }
         }
 
         foreach ($hosts as $host) {
@@ -69,18 +92,35 @@ class WidgetView extends CControllerDashboardWidgetView {
             $loss = $this->valueOf($metrics, 'icmppingloss');
             $seconds = $this->valueOf($metrics, 'icmppingsec');
             $available = is_numeric($ping) ? (float) $ping > 0 : null;
+            $source = 'ICMP';
 
             if ($available === null && is_numeric($loss)) {
                 $available = (float) $loss < 100;
+            }
+
+            if ($available === null) {
+                $agent_ping = $this->valueOf($metrics, 'agent.ping');
+
+                if (is_numeric($agent_ping)) {
+                    $available = (float) $agent_ping > 0;
+                    $source = 'Zabbix Agent';
+                }
+                else {
+                    $available = $this->getAgentAvailability(
+                        $host['interfaces'] ?? []
+                    );
+                    $source = 'Agent interface';
+                }
             }
 
             $rows[] = [
                 'host_name' => $host['name'],
                 'host_ip' => $this->getMainAddress($host['interfaces'] ?? []),
                 'available' => $available,
+                'source' => $source,
                 'latency_ms' => is_numeric($seconds) ? (float) $seconds * 1000 : null,
                 'loss' => is_numeric($loss) ? max(0, min(100, (float) $loss)) : null,
-                'message' => $available === null ? '尚無 ICMP 資料' : ''
+                'message' => $available === null ? '尚無連線資料' : ''
             ];
         }
 
@@ -131,6 +171,31 @@ class WidgetView extends CControllerDashboardWidgetView {
 
             if ((int) $interface['main'] === 1) {
                 return $address;
+            }
+        }
+
+        return $fallback;
+    }
+
+    private function getAgentAvailability(array $interfaces) {
+        $fallback = null;
+
+        foreach ($interfaces as $interface) {
+            if ((int) $interface['type'] !== 1) {
+                continue;
+            }
+
+            $available = (int) $interface['available'];
+            $value = $available === INTERFACE_AVAILABLE_TRUE
+                ? true
+                : ($available === INTERFACE_AVAILABLE_FALSE ? false : null);
+
+            if ($fallback === null) {
+                $fallback = $value;
+            }
+
+            if ((int) $interface['main'] === 1) {
+                return $value;
             }
         }
 

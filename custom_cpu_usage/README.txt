@@ -6,7 +6,8 @@ custom_cpu_usage - Zabbix 6.4 dashboard widget
 - 依 CPU 使用率由高至低排序
 
 資料來源：
+- system.cpu.util（Linux／Windows 模板的總 CPU 使用率）
 - system.cpu.util[,idle]
 - 若模板使用 avg1 或其他 idle 變體，也會自動選取
 
-使用率換算：100 - idle
+優先直接使用 system.cpu.util；沒有總使用率時才以 100 - idle 換算。

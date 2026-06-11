@@ -38,7 +38,8 @@ $create_status = static function ($available, string $message): CTag {
 $table = (new CTableInfo())->setHeader([
     _('電腦名稱'),
     _('IP 位址'),
-    _('ICMP 狀態'),
+    _('連線狀態'),
+    _('檢查來源'),
     _('延遲'),
     _('封包遺失率')
 ]);
@@ -53,6 +54,7 @@ foreach ($data['rows'] as $row) {
         $row['host_name'],
         $row['host_ip'],
         $create_status($row['available'], $row['message']),
+        $row['source'],
         $format_latency($row['latency_ms']),
         $loss
     ]);

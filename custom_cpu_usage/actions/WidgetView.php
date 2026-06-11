@@ -35,16 +35,27 @@ class WidgetView extends CControllerDashboardWidgetView {
             ]);
 
             foreach ($items as $item) {
-                if (!preg_match(
+                if ($item['key_'] === 'system.cpu.util') {
+                    $metric = 'usage';
+                    $priority = 0;
+                }
+                elseif (preg_match(
                     '/^system\.cpu\.util\[[^,]*,idle(?:,[^,\]]*){0,2}\]$/',
                     $item['key_']
                 )) {
+                    $metric = 'idle';
+                    $priority = $item['key_'] === 'system.cpu.util[,idle]'
+                        ? 1
+                        : ($item['key_'] === 'system.cpu.util[,idle,avg1]' ? 2 : 3);
+                }
+                else {
                     continue;
                 }
 
-                $priority = $item['key_'] === 'system.cpu.util[,idle]'
-                    ? 0
-                    : ($item['key_'] === 'system.cpu.util[,idle,avg1]' ? 1 : 2);
+                if (!is_numeric($item['lastvalue'])) {
+                    continue;
+                }
+
                 $hostid = $item['hostid'];
 
                 if (
@@ -56,7 +67,8 @@ class WidgetView extends CControllerDashboardWidgetView {
                     )
                 ) {
                     $cpu_items[$hostid] = [
-                        'idle' => $item['lastvalue'],
+                        'metric' => $metric,
+                        'value' => $item['lastvalue'],
                         'lastclock' => (int) $item['lastclock'],
                         'priority' => $priority
                     ];
@@ -69,8 +81,11 @@ class WidgetView extends CControllerDashboardWidgetView {
             $host_ip = $this->getAgentAddress($host['interfaces'] ?? []);
             $usage = null;
 
-            if (isset($cpu_items[$hostid]) && is_numeric($cpu_items[$hostid]['idle'])) {
-                $usage = max(0, min(100, 100 - (float) $cpu_items[$hostid]['idle']));
+            if (isset($cpu_items[$hostid]) && is_numeric($cpu_items[$hostid]['value'])) {
+                $usage = $cpu_items[$hostid]['metric'] === 'idle'
+                    ? 100 - (float) $cpu_items[$hostid]['value']
+                    : (float) $cpu_items[$hostid]['value'];
+                $usage = max(0, min(100, $usage));
             }
 
             $rows[] = [
